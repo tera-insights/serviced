@@ -23,11 +23,6 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from __future__ import unicode_literals
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
-from builtins import *
-from past.utils import old_div
 import os
 import re
 import subprocess
@@ -136,7 +131,7 @@ def customsize(size, base, map):
     size = size * neg
     i = 0
     while size >= base and i < len(map)-1:
-        size = old_div(size, base)
+        size = size/base * 1.0
         i = i + 1
     size = str(round(size, 3) * neg).strip('0').strip('.') or "0"
     return '%s %s' % (size, map[i])
@@ -230,11 +225,11 @@ def calc_tpool_stats(stats):
     stats = [_f for _f in stats.split(' ') if _f]
     if len(stats) < 4: return data
     data['data_size'] = parse_size(stats[0])
-    data['data_percent'] = old_div(parse_size(stats[1]), 100)
+    data['data_percent'] = parse_size(stats[1]) / 100.0
     data['data_used'] = data['data_size'] * data['data_percent']
     data['data_free'] = data['data_size'] * (1-data['data_percent'])
     data['meta_size'] = parse_size(stats[2])
-    data['meta_percent'] = old_div(parse_size(stats[3]), 100)
+    data['meta_percent'] = parse_size(stats[3]) / 100.0
     data['meta_used'] = data['meta_size'] * data['meta_percent']
     data['meta_free'] = data['meta_size'] * (1-data['meta_percent'])
     return data

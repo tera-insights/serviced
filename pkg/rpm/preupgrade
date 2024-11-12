@@ -19,6 +19,10 @@
 set -e
 
 python <<EOF
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import unicode_literals
 import os
 import re
 import subprocess
@@ -33,10 +37,10 @@ C_WARN   = C_RESET + '\033[93m'
 C_ERR    = C_RESET + '\033[91m'
 
 def set_environ():
-    '''
+    """
     Sets the language environment variables so that all calls
     are returned using en_US localization.
-    '''
+    """
     os.environ['LC_ALL']   = 'en_US.UTF-8'
     os.environ['LC_LANG']  = 'en_US.UTF-8'
     os.environ['LANGUAGE'] = 'en_US.UTF-8'
@@ -218,7 +222,7 @@ def calc_tpool_stats(stats):
     1073741824.0
     """
     data = {}
-    stats = filter(None, stats.split(' '))
+    stats = [_f for _f in stats.split(' ') if _f]
     if len(stats) < 4: return data
     data['data_size'] = parse_size(stats[0])
     data['data_percent'] = parse_size(stats[1]) / 100
@@ -297,17 +301,17 @@ def check_thinpool(stats):
     err = ""
     if stats.get('data_free', None) and stats.get('data_min_free', None) and stats['data_free'] < stats['data_min_free']:
         err += "\n  Error: The thinpool storage free (%s) is under the minimum threshold (%s)" % \
-            (bytesize(stats['data_free']), bytesize(stats['data_min_free']))
+               (bytesize(stats['data_free']), bytesize(stats['data_min_free']))
     if stats.get('meta_free', None) and stats.get('meta_min_free', None) and stats['meta_free'] < stats['meta_min_free']:
         err += "\n  Error: The thinpool metadata free (%s) is under the minimum threshold (%s)" % \
-            (bytesize(stats['meta_free']), bytesize(stats['meta_min_free']))
+               (bytesize(stats['meta_free']), bytesize(stats['meta_min_free']))
         err += "\n  %sThe metadata minimum threshold is calculated as 2 percent of the thinpool minimum threshold value.%s" % \
-            (C_RESET, C_ERR)
+               (C_RESET, C_ERR)
     if len(stats.get('tenants', {})):
         for tenant in stats['tenants']:
             if tenant['free'] < stats['data_min_free']:
                 err += "\n  Error: The tenant volume %s available space (%s) is under the minimum threshold (%s)" % \
-                    (tenant['id'], bytesize(tenant['free']), bytesize(stats['data_min_free']))
+                       (tenant['id'], bytesize(tenant['free']), bytesize(stats['data_min_free']))
     else:
         # Only return an error here if an app has been deployed.
         if app_is_deployed():
@@ -323,8 +327,8 @@ def check_metasize(stats):
     metamin = stats['data_size'] * 0.01
     if stats['meta_size'] < metamin:
         msg = 'Warning: current serviced thinpool metadata size (%s) should be at least %s (1 percent of the thinpool size, %s)' % \
-            (bytesize(stats['meta_size']), bytesize(metamin), bytesize(stats['data_size']))
-        print '\n%s%s%s\n' % (C_WARN, msg, C_RESET)
+              (bytesize(stats['meta_size']), bytesize(metamin), bytesize(stats['data_size']))
+        print('\n%s%s%s\n' % (C_WARN, msg, C_RESET))
 
 
 def get_docker_version():
@@ -372,8 +376,8 @@ def show_help():
     that the old installed (due to failure to upgrade) version expects.
     """
     # Show the cc upgrade guide link.
-    print '%s%s\n' % (C_BOLD, 'Before upgrading, Control Center storage must be expanded to at least the minimum requirements.\n'\
-        'Refer to the Control Center Upgrade Guide to correct storage problems, and run this upgrade again.')
+    print('%s%s\n' % (C_BOLD, 'Before upgrading, Control Center storage must be expanded to at least the minimum requirements.\n' \
+                              'Refer to the Control Center Upgrade Guide to correct storage problems, and run this upgrade again.'))
 
     # Find out what version of docker the currently installed serviced rpm requires.
     cmd = "rpm -qa | grep serviced | head -1 | xargs --no-run-if-empty rpm -qR | grep docker 2>/dev/null || true"
@@ -389,15 +393,15 @@ def show_help():
     # they've upgraded docker separately or yum upgraded it prior to this rpm).
     if not docker_version == dockerinfo[1]:
         # Print the manual steps for restoring the previous docker version.
-        print 'If you cannot immediately expand storage, you need to manually revert docker-engine to version %s' % dockerinfo[1]
-        print '   1. rpm -e --nodeps %s' %  dockerinfo[0]
-        print '   2. yum install -y %s-%s' % (dockerinfo[0], dockerinfo[1])
-        print '   3. Restore the backup files for /etc/sysconfig/docker and /etc/systemd/system/docker.service.d/docker'
-        print '\nIf you did not follow the Control Center Upgrade Guide and do not have those backup files, you\'ll need\n' \
-            'to refer to the original Control Center install instructions to configure docker %s as if it were a new install.' % dockerinfo[1]
-        print '\nDocker and Control Center need to be restarted after rolling back the upgrade.%s\n' % C_RESET
+        print('If you cannot immediately expand storage, you need to manually revert docker-engine to version %s' % dockerinfo[1])
+        print('   1. rpm -e --nodeps %s' %  dockerinfo[0])
+        print('   2. yum install -y %s-%s' % (dockerinfo[0], dockerinfo[1]))
+        print('   3. Restore the backup files for /etc/sysconfig/docker and /etc/systemd/system/docker.service.d/docker')
+        print('\nIf you did not follow the Control Center Upgrade Guide and do not have those backup files, you\'ll need\n' \
+              'to refer to the original Control Center install instructions to configure docker %s as if it were a new install.' % dockerinfo[1])
+        print('\nDocker and Control Center need to be restarted after rolling back the upgrade.%s\n' % C_RESET)
     else:
-        print 'If you cannot immediately expand storage, you can start Control Center now without upgrading.%s\n' % C_RESET
+        print('If you cannot immediately expand storage, you can start Control Center now without upgrading.%s\n' % C_RESET)
 
 # Save the preupgrade serviced version to check whether ElasticSearch and Zookeeper data should be migrated after upgrade
 serviced_version = get_serviced_version()
@@ -428,8 +432,8 @@ check_metasize(stats)
 # Check the serviced thinpool and tenant volumes (if any) for free space prior to upgrading.
 err = check_thinpool(stats)
 if err:
-    print '%s%s%s\n' % (C_ERR, 'This upgrade is being aborted because it would result in the application ' \
-        'being put into Emergency Shutdown mode:\n', err)
+    print('%s%s%s\n' % (C_ERR, 'This upgrade is being aborted because it would result in the application ' \
+                               'being put into Emergency Shutdown mode:\n', err))
     show_help()
     sys.exit(1) # Fail the upgrade.
 EOF

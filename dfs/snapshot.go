@@ -104,6 +104,7 @@ func (dfs *DistributedFilesystem) Snapshot(data SnapshotInfo, spaceFactor int) (
 		glog.Errorf("Could not get info for snapshot %s of tenant %s: %s", label, data.TenantID, err)
 		return "", err
 	}
+	glog.Infof("Snapshot %s for tenant %s completed successfully.", info.Name, data.TenantID)
 	return info.Name, nil
 }
 

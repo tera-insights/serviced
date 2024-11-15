@@ -225,7 +225,10 @@ def calc_tpool_stats(stats):
     1073741824.0
     """
     data = {}
-    stats = [_f for _f in stats.split(b' ') if _f]
+    try:
+        stats = [_f for _f in stats.split(' ') if _f]
+    except TypeError:
+        stats = [_f for _f in stats.split(b' ') if _f]
     if len(stats) < 4: return data
     data['data_size'] = parse_size(stats[0])
     data['data_percent'] = parse_size(stats[1]) / 100

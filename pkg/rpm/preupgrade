@@ -92,30 +92,33 @@ def parse_size(size):
     as a float value. Upper case units are base 1000, lowercase base 1024.
     If the unit has "i" in the middle it uses base 1024.
 
-    >>> parse_size("10K")
+    >>> parse_size(b"10K")
     10000.0
-    >>> parse_size("-10K")
+    >>> parse_size(b"-10K")
     -10000.0
-    >>> parse_size("10 KB")
+    >>> parse_size(b"10 KB")
     10000.0
-    >>> parse_size("10 G")
+    >>> parse_size(b"10 G")
     10000000000.0
-    >>> parse_size("10GB")
+    >>> parse_size(b"10GB")
     10000000000.0
-    >>> parse_size("10k")
+    >>> parse_size(b"10k")
     10240.0
-    >>> parse_size("-10k")
+    >>> parse_size(b"-10k")
     -10240.0
-    >>> parse_size("10 kb")
+    >>> parse_size(b"10 kb")
     10240.0
-    >>> parse_size("10gb")
+    >>> parse_size(b"10gb")
     10737418240.0
-    >>> parse_size("10g")
-    10737418240.0
-    >>> parse_size("10GiB")
+    >>> parse_size(b"10g")
+    10737418240.0 d
+    >>> parse_size(b"10GiB")
     10737418240.0
     """
-    match = sizeRegex.match(size)
+    try:
+        match = sizeRegex.match(size)
+    except TypeError:
+        match = sizeRegex.match(size.decode("utf-8"))
     if not match:
         return None
     neg = -1 if match.group(1) else 1
@@ -222,7 +225,10 @@ def calc_tpool_stats(stats):
     1073741824.0
     """
     data = {}
-    stats = [_f for _f in stats.split(' ') if _f]
+    try:
+        stats = [_f for _f in stats.split(' ') if _f]
+    except TypeError:
+        stats = [_f for _f in stats.split(b' ') if _f]
     if len(stats) < 4: return data
     data['data_size'] = parse_size(stats[0])
     data['data_percent'] = parse_size(stats[1]) / 100

@@ -344,19 +344,11 @@ def get_docker_version():
     """
     # awk/grep isn't grabbing just the version.. parse it out.
     version = subprocess.check_output("docker version | grep '^ Version' | head -1 || true", shell=True).strip()
-    version = [s for s in version.split(b' ') if not s == '']
-    if len(version) > 1:
-        version = version[1].strip()
-    else:
-        version = version[0].strip()
-    if len(version) == 0:
+    version = version.rsplit(b' ', 1)[-1]
+    if not version:
         # older version of docker.
         version = subprocess.check_output("docker version | grep 'Server Version' | head -1 || true", shell=True).strip()
-        version = [s for s in version.split(b' ') if not s == '']
-        if len(version) > 1:
-            version = version[1].strip()
-        else:
-            version = version[0].strip()
+        version = version.rsplit(b' ', 1)[-1]
     return version
 
 
@@ -366,13 +358,7 @@ def get_serviced_version():
     """
     # awk/grep isn't grabbing just the version.. parse it out.
     version = subprocess.check_output("serviced version | grep '^Version' | head -1 || true", shell=True).strip()
-    version = [s for s in version.split(b' ') if not s == '']
-    if not version:
-        return
-    if len(version) > 1:
-        version = version[1].strip()
-    else:
-        version = version[0].strip()
+    version = version.rsplit(b' ', 1)[-1]
     return version
 
 

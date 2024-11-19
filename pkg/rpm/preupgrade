@@ -399,7 +399,10 @@ def show_help():
 serviced_version = get_serviced_version()
 if serviced_version:
     with open(SERVICED_VERSION_FILE, 'w+') as file:
-        file.write(serviced_version)
+        try:
+            file.write(serviced_version)
+        except TypeError:
+            file.write(serviced_version.decode('utf-8'))
 
 
 # If the os environment variable NOCHECK is set, skip this entirely.

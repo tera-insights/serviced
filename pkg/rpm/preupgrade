@@ -398,7 +398,7 @@ def show_help():
 # Save the preupgrade serviced version to check whether ElasticSearch and Zookeeper data should be migrated after upgrade
 serviced_version = get_serviced_version()
 if serviced_version:
-    with open(SERVICED_VERSION_FILE, 'w+') as file:
+    with open(SERVICED_VERSION_FILE, 'wb+') as file:
         file.write(serviced_version)
 
 
